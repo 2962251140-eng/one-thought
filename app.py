@@ -7,7 +7,7 @@ from datetime import datetime
 # ==========================================
 # 1. 页面配置 & 增强型 CSS
 # ==========================================
-st.set_page_config(page_title="一念 | 渐进引导版", page_icon="🌿", layout="wide")
+st.set_page_config(page_title="一念", page_icon="🌿", layout="wide")
 
 st.markdown("""
 <style>
@@ -47,13 +47,13 @@ def chat_with_ai(prompt_type, content, api_key, api_base):
     client = OpenAI(api_key=api_key, base_url=api_base)
     
     if prompt_type == "init":
-        msg = "行动教练。指出价值并给出一个15字内的极简第一步。"
+        msg = "行动教练。指出价值并给出一个50字内的极简第一步。"
     elif prompt_type == "heavy":
         # 初次建议：极度克制
-        msg = "犀利PM。只需说出1项最大风险，并给出一个15字内的MVP测试指令。语气冷酷精炼。"
+        msg = "犀利PM。只需说出2项最大风险，并给出一个30字内的MVP测试指令。语气冷酷精炼。但不用把MVP写入文案"
     elif prompt_type == "heavy_retry":
         # 反驳后建议：开始详细
-        msg = "变通教练。根据用户的反驳理由，给出一个针对性的、稍微详细的执行步骤（40字内），展示你的专业深度。"
+        msg = "变通教练。根据用户的反驳理由，给出一个针对性的、稍微详细的执行步骤（100字内），展示你的专业深度。"
     elif prompt_type == "complete_and_categorize":
         cat_str = "、".join(st.session_state.categories)
         msg = f"归类。从 [{cat_str}] 选一并鼓励。格式：类别 || 鼓励。"
@@ -122,14 +122,14 @@ with header_right:
         # 字体缩小的建议区
         st.markdown(f"<div class='ai-analysis-text'>{st.session_state.heavy_advice}</div>", unsafe_allow_html=True)
         
-        reb = st.text_input("💬 对线理由（输入后 AI 会展示深度建议）：", key="reb", placeholder="我不觉得重，因为...")
+        reb = st.text_input("💬 继续交流（输入后 AI 会展示深度建议）：", key="reb", placeholder="我不觉得重，因为...")
         col1, col2 = st.columns(2)
         if col1.button("🔄 重新分析"): 
             st.session_state.heavy_advice = chat_with_ai("heavy_retry", f"{st.session_state.heavy_idea_temp}\n{reb}", api_key, api_base); st.rerun()
-        if col2.button("🎯 听劝"): 
+        if col2.button("🎯 听取建议"): 
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": f"【降维】{st.session_state.heavy_idea_temp}", "status": "focusing", "ai_prompt": st.session_state.heavy_advice, "reward_text": "", "weight": 5, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
-        if st.button("🚀 头铁执行", use_container_width=True):
+        if st.button("🚀 直接执行", use_container_width=True):
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": st.session_state.heavy_idea_temp, "status": "focusing", "ai_prompt": "⚠️用户坚持原始计划", "reward_text": "", "weight": total_w, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
@@ -171,7 +171,7 @@ with left_tree:
                         l["category"] = p[0].strip(); l["reward_text"] = p[1].strip(); l["status"] = "completed"; l["done_time"] = datetime.now(); st.rerun()
 
 with right_tree:
-    st.subheader("🌟 璀璨之林")
+    st.subheader("🌟 闪耀之林")
     comp_l = [L for L in st.session_state.leaves if L["status"] == "completed"]
     comp_l.sort(key=lambda x: x["done_time"] if x["done_time"] else datetime.min)
     if not comp_l:
