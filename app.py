@@ -7,7 +7,7 @@ from datetime import datetime
 # ==========================================
 # 1. 页面配置 & 增强型 CSS
 # ==========================================
-st.set_page_config(page_title="一念 | 左右平衡版", page_icon="🌿", layout="wide")
+st.set_page_config(page_title="一念 | 终极控制台版", page_icon="🌿", layout="wide")
 
 st.markdown("""
 <style>
@@ -55,12 +55,25 @@ def chat_with_ai(prompt_type, content, api_key, api_base):
     except Exception as e: return f"AI 休息中...({e})"
 
 # ==========================================
-# 3. 侧边栏
+# 3. 侧边栏 (支持云端密钥静默读取)
 # ==========================================
 with st.sidebar:
     st.header("⚙️ 能量源")
-    api_key = st.text_input("DeepSeek Key", type="password")
-    api_base = st.text_input("API Base", value="https://api.deepseek.com/v1")
+    
+    # 尝试读取 Streamlit Cloud 的 Secrets，如果是在本地跑没配，就走 except
+    try:
+        default_api_key = st.secrets["DEEPSEEK_API_KEY"]
+    except:
+        default_api_key = ""
+
+    if default_api_key:
+        api_key = default_api_key
+        api_base = "https://api.deepseek.com/v1"
+        st.success("✨ 已连接专属 AI 引擎，直接可用！")
+    else:
+        api_key = st.text_input("DeepSeek Key", type="password")
+        api_base = st.text_input("API Base", value="https://api.deepseek.com/v1")
+        
     st.divider()
     st.header("🌿 枝桠管理")
     new_cat = st.text_input("新增分类：")
@@ -85,9 +98,9 @@ with st.sidebar:
 st.markdown("<h1 class='main-title'>🌿 一 念</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>化瞬间灵感，为生命之树</p>", unsafe_allow_html=True)
 
-# 校验 API Key
+# 强制校验 API Key，防止没 Key 报错
 if not api_key:
-    st.warning("🔑 请先在左侧边栏填入 API Key，否则无法唤醒 AI 教练。")
+    st.warning("🔑 请先在左侧边栏填入 API Key，激活一念。")
     st.stop()
 
 header_left, header_right = st.columns([1.5, 1])
@@ -151,7 +164,7 @@ with left_tree:
             with cat_tabs_left[i]:
                 cur_tab_leaves = active_l if i==0 else [L for L in active_l if L.get("category") == tab_n.replace("📦 ","")]
                 for l in cur_tab_leaves:
-                    # 使用 tab_n 保证 key 唯一
+                    # 使用 _{i} 防止组件 key 重复报错
                     st.markdown(f'<div class="leaf-card leaf-active"><b>{l["content"]}</b><br><small>👣 {l.get("detail","")}<br>🤖 {l["ai_prompt"]}</small></div>', unsafe_allow_html=True)
                     c1, c2, c3 = st.columns([2, 1, 1])
                     if c1.button("✅ 完成", key=f"do_{l['id']}_{i}", use_container_width=True):
@@ -189,7 +202,6 @@ with right_tree:
                     """, unsafe_allow_html=True)
                     
                     with st.popover("📝 感悟 / ⚙️ 管理", key=f"pop_c_{l['id']}_{i}", use_container_width=True):
-                        # 核心修复点：key 加入了 i (tab 索引)，解决 Duplicate Key 报错
                         new_note = st.text_area("记录感悟...", value=l["notes"], key=f"nt_{l['id']}_{i}")
                         if st.button("保存感悟", key=f"sv_nt_{l['id']}_{i}"): l["notes"] = new_note; st.rerun()
                         st.divider()
