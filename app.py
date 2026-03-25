@@ -139,13 +139,13 @@ with header_right:
     if st.session_state.heavy_advice:
         st.markdown("<div class='rebuttal-container'>", unsafe_allow_html=True)
         st.info(f"🤖 **AI 对线建议：**\n{st.session_state.heavy_advice}")
-        reb = st.text_input("💬 不服？回怼理由：", key="reb", placeholder="比如：我有空 / 设备已买齐...")
+        reb = st.text_input("💬 反驳：", key="reb", placeholder="比如：我有空 / 设备已买齐...")
         col_reb1, col_reb2 = st.columns(2)
         if col_reb1.button("🔄 重新规划"): st.session_state.heavy_advice = chat_with_ai("heavy_retry", f"{st.session_state.heavy_idea_temp}\n{reb}", api_key, api_base); st.rerun()
-        if col_reb2.button("🎯 听劝采纳"): 
+        if col_reb2.button("🎯 采纳"): 
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": f"【降维】{st.session_state.heavy_idea_temp}", "status": "focusing", "ai_prompt": st.session_state.heavy_advice, "reward_text": "", "weight": 5, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
-        if st.button("🚀 头铁生成", use_container_width=True):
+        if st.button("🚀 直接生成", use_container_width=True):
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": st.session_state.heavy_idea_temp, "status": "focusing", "ai_prompt": "⚠️重力警告", "reward_text": "", "weight": total_w, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
