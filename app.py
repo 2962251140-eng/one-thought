@@ -7,7 +7,7 @@ from datetime import datetime
 # ==========================================
 # 1. 页面配置 & 增强型 CSS
 # ==========================================
-st.set_page_config(page_title="一念 | 终极控制台版", page_icon="🌿", layout="wide")
+st.set_page_config(page_title="一念", page_icon="🌿", layout="wide")
 
 st.markdown("""
 <style>
@@ -42,7 +42,7 @@ def chat_with_ai(prompt_type, content, api_key, api_base):
     client = OpenAI(api_key=api_key, base_url=api_base)
     
     if prompt_type == "init":
-        msg = "行动教练。指出价值并给第一步（30字内）。"
+        msg = "行动教练。指出价值并给第一步（50字内）。"
     elif prompt_type == "heavy":
         # 【修改点】明确限制100字以内，并要求分析分数分布
         msg = "犀利PM。根据用户提供的时间、金钱、耗神得分分布，一针见血指出完成该想法最核心的困难点，并给1个破局建议。语气干练，严格控制在100字以内。不要说废话，细节等用户反驳后再补充。"
@@ -123,7 +123,7 @@ with header_left:
     t_w = t + m + e
     
     # 【修改点】为按钮添加提示
-    if st.button("✨ 凝结初叶", use_container_width=True, help="点击记录。如果三项重力总和大于20，将触发AI预警与难度博弈。"):
+    if st.button("✨ 凝结初叶", use_container_width=True, help="点击记录。如果三项重力总和大于20，将触发AI对想法完成难度的分析。"):
         if new_idea:
             if t_w >= 21:
                 # 【修改点】将分数分布拼接进 content，传给 AI 分析
@@ -139,14 +139,14 @@ with header_right:
         st.markdown("<div class='rebuttal-container'>", unsafe_allow_html=True)
         st.info(f"🤖 **AI 重力诊断：**\n{st.session_state.heavy_advice}")
         # 【修改点】引导用户反驳的占位符
-        reb = st.text_input("💬 不服？回怼理由：", key="reb", placeholder="例如：其实我懂代码，时间成本没那么高...")
+        reb = st.text_input("💬 继续交流：", key="reb", placeholder="例如：其实我懂代码，时间成本没那么高...")
         col_reb1, col_reb2 = st.columns(2)
         if col_reb1.button("🔄 重新规划", help="让 AI 根据你的补充理由重新评估"): 
             st.session_state.heavy_advice = chat_with_ai("heavy_retry", f"原想法：{st.session_state.heavy_idea_temp}\n反驳理由：{reb}", api_key, api_base); st.rerun()
-        if col_reb2.button("🎯 听劝采纳", help="接受 AI 的降维建议，化繁为简"): 
+        if col_reb2.button("🎯 听取建议", help="接受 AI 的建议，化繁为简"): 
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": f"【降维】{st.session_state.heavy_idea_temp}", "status": "focusing", "ai_prompt": st.session_state.heavy_advice, "reward_text": "", "weight": 5, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
-        if st.button("🚀 头铁强行生成", use_container_width=True, help="无视 AI 建议，坚持按原想法硬核开局"):
+        if st.button("🚀 直接生成", use_container_width=True, help="无视 AI 建议，坚持按原想法实现想法"):
             st.session_state.leaves.insert(0, {"id": str(uuid.uuid4()), "content": st.session_state.heavy_idea_temp, "status": "focusing", "ai_prompt": "⚠️重力警告：坚持硬核路线，随时注意内耗度。", "reward_text": "", "weight": t_w, "detail": "", "category": "未分类", "notes": "", "done_time": None})
             st.session_state.heavy_advice = None; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
